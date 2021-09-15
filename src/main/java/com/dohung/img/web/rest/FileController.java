@@ -3,6 +3,9 @@ package com.dohung.img.web.rest;
 import com.dohung.img.service.FileStorageService;
 import com.dohung.img.web.rest.response.UploadFileResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,25 +27,24 @@ public class FileController {
     private FileStorageService fileStorageService;
 
     @PostMapping("/uploadFile")
-    public UploadFileResponse uploadFile(
-        @RequestParam("file") MultipartFile file,
-        @RequestParam("level") Integer level,
-        @RequestParam("parentId") Integer parentId
-    ) {
-        String fileName = fileStorageService.storeFile(file, level, parentId);
+    public UploadFileResponse uploadFile(@RequestParam("file") MultipartFile file) {
+        UploadFileResponse uploadFileResponseReturn = fileStorageService.storeFile(file);
 
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/").path(fileName).toUriString();
+        String fileDownloadUri = ServletUriComponentsBuilder
+            .fromCurrentContextPath()
+            .path("/downloadFile/")
+            .path(uploadFileResponseReturn.getFileName())
+            .toUriString();
+        uploadFileResponseReturn.setFileType(file.getContentType());
+        uploadFileResponseReturn.setSize(file.getSize());
 
-        return new UploadFileResponse(fileName, fileDownloadUri, file.getContentType(), file.getSize());
+        return uploadFileResponseReturn;
     }
 
-    //	@PostMapping("/uploadMultipleFiles")
-    //	public List<UploadFileResponse> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
-    //		return Arrays.asList(files)
-    //				.stream()
-    //				.map(file -> uploadFile(file))
-    //				.collect(Collectors.toList());
-    //	}
+    @PostMapping("/uploadMultipleFiles")
+    public List<UploadFileResponse> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
+        return Arrays.asList(files).stream().map(file -> uploadFile(file)).collect(Collectors.toList());
+    }
 
     @GetMapping("/downloadFile/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
@@ -68,4 +70,33 @@ public class FileController {
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
             .body(resource);
     }
+    //    @PostMapping("/uploadFile")
+    //    public ResponseEntity uploadFile(
+    //        @RequestParam("file") MultipartFile file
+    //    ) {
+    //
+    //        String fileName = fileStorageService.storeFile(file);
+    //
+    //        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/").path(fileName).toUriString();
+    //        System.out.println("fileDownloadUri" + fileDownloadUri);
+    //
+    //        return new ResponseEntity(fileName, HttpStatus.OK);
+    //    }
+    //
+    //    @PostMapping("/uploadMultipleFiles")
+    //    public ResponseEntity uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
+    //        return new ResponseEntity(Arrays.asList(files)
+    //            .stream()
+    //            .map(file -> uploadFile(file))
+    //            .collect(Collectors.toList()), HttpStatus.OK);
+    //    }
+
+    //    @PostMapping("/uploadMultipleFiles")
+    //    public List<UploadFileResponse> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
+    //        return Arrays.asList(files)
+    //            .stream()
+    //            .map(file -> uploadFile(file))
+    //            .collect(Collectors.toList());
+    //    }
+
 }

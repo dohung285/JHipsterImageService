@@ -2,16 +2,28 @@ package com.dohung.img.web.rest.response;
 
 public class UploadFileResponse {
 
+    private Integer id;
     private String fileName;
     private String fileDownloadUri;
     private String fileType;
     private long size;
 
-    public UploadFileResponse(String fileName, String fileDownloadUri, String fileType, long size) {
+    public UploadFileResponse() {}
+
+    public UploadFileResponse(Integer id, String fileName, String fileDownloadUri, String fileType, long size) {
+        this.id = id;
         this.fileName = fileName;
         this.fileDownloadUri = fileDownloadUri;
         this.fileType = fileType;
         this.size = size;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getFileName() {
@@ -45,6 +57,27 @@ public class UploadFileResponse {
     public void setSize(long size) {
         this.size = size;
     }
+
     // Getters and Setters (Omitted for brevity)
 
+    @Override
+    public String toString() {
+        return (
+            "UploadFileResponse{" +
+            "id=" +
+            id +
+            ", fileName='" +
+            fileName +
+            '\'' +
+            ", fileDownloadUri='" +
+            fileDownloadUri +
+            '\'' +
+            ", fileType='" +
+            fileType +
+            '\'' +
+            ", size=" +
+            size +
+            '}'
+        );
+    }
 }
